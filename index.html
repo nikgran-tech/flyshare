@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FlyShare — Split your airport ride</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f6f2;
+    --surface: #ffffff;
+    --border: #e4e2db;
+    --border-strong: #c8c5bc;
+    --text: #1a1916;
+    --text-muted: #6b6760;
+    --text-faint: #a09d98;
+    --accent: #1a1916;
+    --accent-hover: #2d2b27;
+    --green: #166534;
+    --green-bg: #f0fdf4;
+    --green-border: #bbf7d0;
+    --amber: #92400e;
+    --amber-bg: #fffbeb;
+    --amber-border: #fde68a;
+    --blue: #1e3a8a;
+    --blue-bg: #eff6ff;
+    --blue-border: #bfdbfe;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 12px 40px rgba(0,0,0,0.06);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ─────────────────────────────────────── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(247,246,242,0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-logo {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    color: var(--text);
+    text-decoration: none;
+    letter-spacing: -0.3px;
+    cursor: pointer;
+  }
+  .nav-logo span { font-style: italic; }
+  .nav-cta {
+    background: var(--accent); color: #fff;
+    border: none; border-radius: var(--radius-sm);
+    padding: 8px 18px; font-size: 13.5px; font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer; transition: background .15s, transform .1s;
+    letter-spacing: 0.1px;
+  }
+  .nav-cta:hover { background: var(--accent-hover); }
+  .nav-cta:active { transform: scale(0.97); }
+
+  /* ── PAGES ───────────────────────────────────── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── HERO ────────────────────────────────────── */
+  .hero {
+    max-width: 720px; margin: 0 auto;
+    padding: 80px 24px 64px;
+    text-align: center;
+  }
+  .hero-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 100px; padding: 5px 14px;
+    font-size: 12.5px; color: var(--text-muted);
+    margin-bottom: 32px; box-shadow: var(--shadow);
+  }
+  .hero-pill-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #22c55e; animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; } 50% { opacity: .4; }
+  }
+  .hero h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(36px, 6vw, 58px);
+    line-height: 1.1; letter-spacing: -1.5px;
+    color: var(--text); margin-bottom: 20px;
+  }
+  .hero h1 em { font-style: italic; color: var(--text-muted); }
+  .hero-sub {
+    font-size: 17px; color: var(--text-muted);
+    max-width: 500px; margin: 0 auto 40px;
+    line-height: 1.65; font-weight: 300;
+  }
+  .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--accent); color: #fff;
+    border: none; border-radius: var(--radius);
+    padding: 14px 28px; font-size: 15px; font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer; transition: background .15s, transform .1s, box-shadow .15s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .btn-primary:hover { background: var(--accent-hover); box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-secondary {
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 28px; font-size: 15px; font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer; transition: border-color .15s, box-shadow .15s, transform .1s;
+    box-shadow: var(--shadow);
+  }
+  .btn-secondary:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); }
+  .btn-secondary:active { transform: scale(0.98); }
+
+  /* ── STATS BAR ───────────────────────────────── */
+  .stats-bar {
+    display: flex; justify-content: center; gap: 40px;
+    max-width: 500px; margin: 0 auto 80px;
+    flex-wrap: wrap;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 28px; letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .stat-label { font-size: 12px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; }
+
+  /* ── HOW IT WORKS ────────────────────────────── */
+  .section {
+    max-width: 800px; margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--text-faint);
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(26px, 4vw, 36px);
+    letter-spacing: -0.8px; line-height: 1.15;
+    margin-bottom: 40px;
+  }
+  .steps {
+    display: grid; gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+  .step-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    transition: box-shadow .2s, transform .2s;
+  }
+  .step-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .step-num {
+    font-family: 'Instrument Serif', serif; font-style: italic;
+    font-size: 32px; color: var(--border-strong);
+    margin-bottom: 12px; line-height: 1;
+  }
+  .step-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .step-card p { font-size: 13.5px; color: var(--text-muted); line-height: 1.5; }
+
+  /* ── ROUTE VISUAL ────────────────────────────── */
+  .route-visual {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    margin-bottom: 40px;
+    box-shadow: var(--shadow);
+    display: flex; align-items: center; gap: 16px;
+    flex-wrap: wrap;
+  }
+  .route-endpoint {
+    flex: 1; min-width: 120px;
+  }
+  .route-endpoint-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-faint); margin-bottom: 4px; }
+  .route-endpoint-name { font-size: 17px; font-weight: 600; }
+  .route-endpoint-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .route-arrow {
+    color: var(--text-muted); font-size: 20px;
+    flex-shrink: 0;
+  }
+  .route-middle { text-align: center; flex: 0; }
+  .route-distance {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 100px; padding: 4px 12px;
+    font-size: 12px; color: var(--text-muted); white-space: nowrap;
+  }
+
+  /* ── SAVINGS CALLOUT ─────────────────────────── */
+  .savings-callout {
+    background: var(--text);
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 32px;
+    text-align: center;
+    margin-bottom: 80px;
+  }
+  .savings-callout h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(24px, 4vw, 34px);
+    letter-spacing: -0.5px; margin-bottom: 8px;
+  }
+  .savings-callout p { color: rgba(255,255,255,0.65); font-size: 15px; margin-bottom: 24px; }
+  .savings-grid { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; }
+  .savings-item { }
+  .savings-amount { font-family: 'Instrument Serif', serif; font-size: 36px; letter-spacing: -1px; }
+  .savings-desc { font-size: 12px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.8px; }
+
+  /* ── FORM PAGE ───────────────────────────────── */
+  .form-page {
+    max-width: 560px; margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+  .form-header { margin-bottom: 32px; }
+  .form-header h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 32px; letter-spacing: -0.8px; margin-bottom: 8px;
+  }
+  .form-header p { color: var(--text-muted); font-size: 15px; }
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    box-shadow: var(--shadow);
+  }
+  .form-group { margin-bottom: 20px; }
+  .form-label {
+    display: block;
+    font-size: 13px; font-weight: 500; color: var(--text);
+    margin-bottom: 6px; letter-spacing: 0.1px;
+  }
+  .form-label .optional { font-weight: 400; color: var(--text-faint); margin-left: 4px; }
+  .form-input, .form-select {
+    width: 100%; padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 14.5px; font-family: 'DM Sans', sans-serif;
+    color: var(--text); background: var(--bg);
+    transition: border-color .15s, box-shadow .15s;
+    outline: none; appearance: none;
+  }
+  .form-input:focus, .form-select:focus {
+    border-color: var(--accent); background: var(--surface);
+    box-shadow: 0 0 0 3px rgba(26,25,22,0.08);
+  }
+  .form-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b6760' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; cursor: pointer; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+  .form-hint { font-size: 12px; color: var(--text-faint); margin-top: 5px; }
+  .time-window-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .time-btn {
+    padding: 10px 0; text-align: center;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 13px; font-family: 'DM Sans', sans-serif;
+    cursor: pointer; background: var(--bg); color: var(--text-muted);
+    transition: all .15s; font-weight: 400;
+  }
+  .time-btn:hover { border-color: var(--border-strong); color: var(--text); }
+  .time-btn.selected { background: var(--text); color: #fff; border-color: var(--text); font-weight: 500; }
+  .time-btn small { display: block; font-size: 11px; margin-top: 2px; opacity: 0.6; }
+  .route-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .route-btn {
+    padding: 12px 8px; text-align: center;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 13px; font-family: 'DM Sans', sans-serif;
+    cursor: pointer; background: var(--bg); color: var(--text-muted);
+    transition: all .15s; font-weight: 400; line-height: 1.4;
+  }
+  .route-btn:hover { border-color: var(--border-strong); color: var(--text); }
+  .route-btn.selected { background: var(--text); color: #fff; border-color: var(--text); font-weight: 500; }
+  .route-btn .route-icon { font-size: 18px; display: block; margin-bottom: 4px; }
+  .submit-btn {
+    width: 100%; margin-top: 8px;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: var(--radius);
+    padding: 14px; font-size: 15px; font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer; transition: background .15s, transform .1s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .submit-btn:hover { background: var(--accent-hover); }
+  .submit-btn:active { transform: scale(0.99); }
+  .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+  /* ── STATUS PAGE ─────────────────────────────── */
+  .status-page {
+    max-width: 560px; margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+  .status-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13.5px; color: var(--text-muted);
+    cursor: pointer; margin-bottom: 32px;
+    transition: color .15s; background: none; border: none;
+    font-family: 'DM Sans', sans-serif; padding: 0;
+  }
+  .status-back:hover { color: var(--text); }
+  .status-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px; box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+  .status-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; gap: 12px; }
+  .status-id { font-size: 12px; color: var(--text-faint); font-weight: 500; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .status-name { font-family: 'Instrument Serif', serif; font-size: 22px; letter-spacing: -0.3px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 100px; font-size: 12.5px; font-weight: 500; flex-shrink: 0;
+  }
+  .badge-matching { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+  .badge-matched { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .status-meta { display: flex; flex-wrap: wrap; gap: 16px; padding: 16px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .meta-item { }
+  .meta-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-faint); margin-bottom: 3px; }
+  .meta-value { font-size: 14px; font-weight: 500; }
+  .matching-state { text-align: center; padding: 24px 0; }
+  .matching-spinner {
+    width: 40px; height: 40px; border: 2px solid var(--border);
+    border-top-color: var(--text); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .matching-state h3 { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+  .matching-state p { font-size: 14px; color: var(--text-muted); }
+  .matched-group { }
+  .group-id-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .group-id-label { font-size: 12px; color: var(--text-faint); margin-bottom: 2px; }
+  .group-id-value { font-family: 'Instrument Serif', serif; font-size: 26px; letter-spacing: -0.5px; }
+  .riders-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .rider-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; background: var(--bg);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+  .rider-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--text); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; flex-shrink: 0;
+    font-family: 'Instrument Serif', serif;
+  }
+  .rider-info { flex: 1; }
+  .rider-name { font-size: 14px; font-weight: 500; }
+  .rider-you { font-size: 11px; color: var(--text-faint); margin-left: 6px; }
+  .rider-email { font-size: 12px; color: var(--text-faint); margin-top: 1px; }
+  .pickup-box {
+    background: var(--blue-bg); border: 1px solid var(--blue-border);
+    border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 20px;
+  }
+  .pickup-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--blue); margin-bottom: 4px; font-weight: 600; }
+  .pickup-location { font-size: 14.5px; font-weight: 500; margin-bottom: 4px; }
+  .pickup-note { font-size: 12.5px; color: var(--text-muted); }
+  .instruction-box {
+    background: var(--bg); border-radius: var(--radius-sm);
+    padding: 14px 16px; border: 1px solid var(--border);
+  }
+  .instruction-box p { font-size: 13.5px; color: var(--text-muted); line-height: 1.6; }
+  .instruction-box strong { color: var(--text); }
+
+  /* ── LOOKUP FORM ─────────────────────────────── */
+  .lookup-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow);
+  }
+  .lookup-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .lookup-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+  .lookup-row { display: flex; gap: 8px; }
+  .lookup-row .form-input { flex: 1; }
+
+  /* ── TOAST ───────────────────────────────────── */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--text); color: #fff;
+    padding: 12px 20px; border-radius: var(--radius);
+    font-size: 14px; font-weight: 500;
+    box-shadow: var(--shadow-md); transition: transform .3s ease, opacity .3s ease;
+    opacity: 0; pointer-events: none; z-index: 999; white-space: nowrap;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  /* ── FOOTER ──────────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 24px;
+    text-align: center;
+  }
+  footer p { font-size: 13px; color: var(--text-faint); }
+  footer strong { color: var(--text-muted); font-weight: 500; }
+
+  /* ── SUCCESS OVERLAY ─────────────────────────── */
+  .success-overlay {
+    text-align: center; padding: 16px 0 8px;
+  }
+  .success-icon {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--green-bg); border: 2px solid var(--green-border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; margin: 0 auto 16px;
+  }
+  .success-overlay h3 { font-family: 'Instrument Serif', serif; font-size: 22px; letter-spacing: -0.3px; margin-bottom: 8px; }
+  .success-overlay p { font-size: 14px; color: var(--text-muted); margin-bottom: 6px; }
+  .request-id-display {
+    display: inline-block;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 8px 16px;
+    font-family: 'Instrument Serif', serif; font-size: 22px; letter-spacing: 0.5px;
+    margin: 12px 0 20px;
+  }
+
+  /* ── ADMIN PANEL ─────────────────────────────── */
+  .admin-page {
+    max-width: 900px; margin: 0 auto; padding: 48px 24px 80px;
+  }
+  .admin-table {
+    width: 100%; border-collapse: collapse;
+    background: var(--surface); border-radius: var(--radius);
+    overflow: hidden; box-shadow: var(--shadow);
+    border: 1px solid var(--border); font-size: 13px;
+  }
+  .admin-table th {
+    background: var(--bg); padding: 10px 14px;
+    text-align: left; font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--text-faint); border-bottom: 1px solid var(--border);
+  }
+  .admin-table td {
+    padding: 10px 14px; border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .admin-table tr:last-child td { border-bottom: none; }
+  .admin-table tr:hover td { background: var(--bg); }
+
+  @media (max-width: 600px) {
+    .hero { padding: 48px 20px 48px; }
+    .form-card { padding: 24px 20px; }
+    .status-card { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">Fly<span>Share</span></div>
+  <button class="nav-cta" onclick="showPage('form')">Find a ride</button>
+</nav>
+
+<!-- ═══════════════════════════ HOME PAGE ═══════════════════════════ -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-pill">
+      <div class="hero-pill-dot"></div>
+      Ann Arbor ↔ Detroit Metro
+    </div>
+    <h1>Split your airport<br>Uber with <em>other students.</em></h1>
+    <p class="hero-sub">FlyShare matches University of Michigan students traveling between DTW and campus — so you never pay full price for a ride alone.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="showPage('form')">Find a ride →</button>
+      <button class="btn-secondary" onclick="showPage('lookup')">Check my status</button>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-num">~$70</div>
+      <div class="stat-label">Avg solo ride</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">~$20</div>
+      <div class="stat-label">With 3 riders</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">45 mi</div>
+      <div class="stat-label">DTW to campus</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="route-visual">
+      <div class="route-endpoint">
+        <div class="route-endpoint-label">Airport</div>
+        <div class="route-endpoint-name">DTW</div>
+        <div class="route-endpoint-sub">Detroit Metro Airport</div>
+      </div>
+      <div style="flex:1; display:flex; align-items:center; gap:8px; justify-content:center;">
+        <div style="height:1px; flex:1; background:var(--border-strong);"></div>
+        <div class="route-distance">45 min</div>
+        <div style="height:1px; flex:1; background:var(--border-strong);"></div>
+      </div>
+      <div class="route-endpoint" style="text-align:right;">
+        <div class="route-endpoint-label">Campus</div>
+        <div class="route-endpoint-name">UMich</div>
+        <div class="route-endpoint-sub">Ann Arbor, MI</div>
+      </div>
+    </div>
+
+    <div class="section-label">How it works</div>
+    <div class="section-title">Three steps to a cheaper ride.</div>
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <h3>Submit your trip</h3>
+        <p>Tell us your route, date, and approximate time. Takes under a minute.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <h3>We find your match</h3>
+        <p>We match you with 1–3 other students traveling the same route within 2 hours of your time.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <h3>Share the ride</h3>
+        <p>See your group, meet at the pickup point, and split the Uber. Simple.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="savings-callout">
+      <h2>Save up to $50 per trip.</h2>
+      <p>A solo ride costs around $70. Split it 4 ways and you each pay about $18.</p>
+      <div class="savings-grid">
+        <div class="savings-item">
+          <div class="savings-amount">$70</div>
+          <div class="savings-desc">Solo</div>
+        </div>
+        <div class="savings-item">
+          <div class="savings-amount">$35</div>
+          <div class="savings-desc">2 riders</div>
+        </div>
+        <div class="savings-item">
+          <div class="savings-amount">$23</div>
+          <div class="savings-desc">3 riders</div>
+        </div>
+        <div class="savings-item">
+          <div class="savings-amount">$18</div>
+          <div class="savings-desc">4 riders</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════ FORM PAGE ═══════════════════════════ -->
+<div id="page-form" class="page">
+  <div class="form-page">
+    <button class="status-back" onclick="showPage('home')">← Back</button>
+    <div class="form-header">
+      <h2>Request a ride match</h2>
+      <p>Fill in your trip details and we'll find students going your way.</p>
+    </div>
+    <div class="form-card" id="form-container">
+      <div class="form-group">
+        <div class="form-row">
+          <div>
+            <label class="form-label">First name</label>
+            <input class="form-input" id="f-name" type="text" placeholder="Alex" />
+          </div>
+          <div>
+            <label class="form-label">Last name</label>
+            <input class="form-input" id="f-lastname" type="text" placeholder="Johnson" />
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email <span class="optional">(.edu preferred)</span></label>
+        <input class="form-input" id="f-email" type="email" placeholder="alexj@umich.edu" />
+        <div class="form-hint">Used to notify you when you're matched.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">School</label>
+        <select class="form-select" id="f-school">
+          <option value="University of Michigan">University of Michigan</option>
+          <option value="Michigan State University">Michigan State University</option>
+          <option value="Wayne State University">Wayne State University</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <hr class="divider" />
+      <div class="form-group">
+        <label class="form-label">Route</label>
+        <div class="route-toggle">
+          <button class="route-btn selected" id="route-dtw" onclick="selectRoute('DTW→ANN')">
+            <span class="route-icon">✈️</span>
+            DTW → Ann Arbor<br>
+            <small style="font-size:11px;opacity:0.7;font-weight:400;">Arriving at DTW</small>
+          </button>
+          <button class="route-btn" id="route-ann" onclick="selectRoute('ANN→DTW')">
+            <span class="route-icon">🏫</span>
+            Ann Arbor → DTW<br>
+            <small style="font-size:11px;opacity:0.7;font-weight:400;">Departing from campus</small>
+          </button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Travel date</label>
+        <input class="form-input" id="f-date" type="date" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Time window</label>
+        <div class="time-window-grid">
+          <button class="time-btn" id="tw-morning" onclick="selectTime('Morning')">
+            Morning<small>6am–12pm</small>
+          </button>
+          <button class="time-btn" id="tw-afternoon" onclick="selectTime('Afternoon')">
+            Afternoon<small>12pm–6pm</small>
+          </button>
+          <button class="time-btn" id="tw-evening" onclick="selectTime('Evening')">
+            Evening<small>6pm–12am</small>
+          </button>
+        </div>
+      </div>
+      <button class="submit-btn" id="submit-btn" onclick="submitForm()">
+        <span id="submit-text">Find my match →</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ STATUS PAGE ══════════════════════════ -->
+<div id="page-status" class="page">
+  <div class="status-page" id="status-content">
+    <!-- populated dynamically -->
+  </div>
+</div>
+
+<!-- ═══════════════════════════ LOOKUP PAGE ══════════════════════════ -->
+<div id="page-lookup" class="page">
+  <div class="form-page">
+    <button class="status-back" onclick="showPage('home')">← Back</button>
+    <div class="form-header">
+      <h2>Check ride status</h2>
+      <p>Enter your request ID to see your match status.</p>
+    </div>
+    <div class="lookup-card">
+      <h3>Enter your Request ID</h3>
+      <p>Your ID was shown after submitting (e.g. FS-0001)</p>
+      <div class="lookup-row">
+        <input class="form-input" id="lookup-input" placeholder="FS-0001" onkeydown="if(event.key==='Enter')lookupRequest()" />
+        <button class="btn-primary" style="white-space:nowrap;padding:10px 20px;border-radius:var(--radius-sm);font-size:14px;" onclick="lookupRequest()">Look up</button>
+      </div>
+      <div id="lookup-error" style="margin-top:10px;font-size:13px;color:#dc2626;display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- FOOTER -->
+<footer>
+  <p>Made for <strong>University of Michigan</strong> students · DTW ↔ Ann Arbor · <strong>FlyShare</strong></p>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  DATA STORE (in-memory, persisted to localStorage)
+// ═══════════════════════════════════════════════════════════════
+const DB_KEY = 'flyshare_db';
+
+function loadDB() {
+  try {
+    const raw = localStorage.getItem(DB_KEY);
+    return raw ? JSON.parse(raw) : { requests: [], groups: [], counter: 0 };
+  } catch { return { requests: [], groups: [], counter: 0 }; }
+}
+
+function saveDB(db) {
+  try { localStorage.setItem(DB_KEY, JSON.stringify(db)); } catch {}
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════
+let selectedRoute = 'DTW→ANN';
+let selectedTime = null;
+
+// ═══════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  FORM SELECTORS
+// ═══════════════════════════════════════════════════════════════
+function selectRoute(r) {
+  selectedRoute = r;
+  document.getElementById('route-dtw').classList.toggle('selected', r === 'DTW→ANN');
+  document.getElementById('route-ann').classList.toggle('selected', r === 'ANN→DTW');
+}
+
+function selectTime(t) {
+  selectedTime = t;
+  ['Morning','Afternoon','Evening'].forEach(w => {
+    document.getElementById('tw-' + w.toLowerCase()).classList.toggle('selected', w === t);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  GENERATE IDs
+// ═══════════════════════════════════════════════════════════════
+function genRequestId(counter) {
+  return 'FS-' + String(counter).padStart(4, '0');
+}
+function genGroupId(n) {
+  return 'G-' + String(n).padStart(2, '0');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MATCHING LOGIC
+// ═══════════════════════════════════════════════════════════════
+function timeWindowOverlaps(a, b) {
+  // Same window always overlaps. Adjacent windows overlap.
+  const order = ['Morning', 'Afternoon', 'Evening'];
+  const ia = order.indexOf(a), ib = order.indexOf(b);
+  return Math.abs(ia - ib) <= 1;
+}
+
+function tryMatch(db, newReq) {
+  // Find unmatched requests with same route, same date, overlapping time window
+  const candidates = db.requests.filter(r =>
+    r.id !== newReq.id &&
+    r.status === 'Matching' &&
+    r.route === newReq.route &&
+    r.date === newReq.date &&
+    timeWindowOverlaps(r.timeWindow, newReq.timeWindow) &&
+    (!r.groupId) // not already in a group
+  );
+
+  // Include the new request itself
+  const pool = [newReq, ...candidates];
+
+  if (pool.length < 2) return; // no match yet
+
+  // Take up to 4 riders
+  const group = pool.slice(0, 4);
+
+  // Create group
+  db.counter++;
+  const groupId = genGroupId(db.counter);
+  const pickupLocation = newReq.route === 'DTW→ANN'
+    ? 'DTW – McNamara Terminal, Arrivals Level (Door 4)'
+    : 'UMich – North Quad (1101 N University Ave)';
+
+  const newGroup = {
+    id: groupId,
+    route: newReq.route,
+    date: newReq.date,
+    timeWindow: newReq.timeWindow,
+    memberIds: group.map(r => r.id),
+    pickupLocation,
+    createdAt: new Date().toISOString(),
+  };
+
+  db.groups.push(newGroup);
+
+  // Update all members
+  group.forEach(member => {
+    const req = db.requests.find(r => r.id === member.id);
+    if (req) { req.status = 'Matched'; req.groupId = groupId; }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SUBMIT FORM
+// ═══════════════════════════════════════════════════════════════
+function submitForm() {
+  const name = document.getElementById('f-name').value.trim();
+  const lastname = document.getElementById('f-lastname').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const school = document.getElementById('f-school').value;
+  const date = document.getElementById('f-date').value;
+
+  if (!name || !email || !date || !selectedTime) {
+    showToast('Please fill in all fields and select a time window.');
+    return;
+  }
+  if (!email.includes('@')) {
+    showToast('Please enter a valid email address.');
+    return;
+  }
+
+  const btn = document.getElementById('submit-btn');
+  const txt = document.getElementById('submit-text');
+  btn.disabled = true;
+  txt.textContent = 'Finding matches…';
+
+  setTimeout(() => {
+    const db = loadDB();
+    db.counter++;
+    const requestId = genRequestId(db.counter);
+
+    const req = {
+      id: requestId,
+      name: name + (lastname ? ' ' + lastname : ''),
+      firstName: name,
+      email,
+      school,
+      route: selectedRoute,
+      date,
+      timeWindow: selectedTime,
+      status: 'Matching',
+      groupId: null,
+      createdAt: new Date().toISOString(),
+    };
+
+    db.requests.push(req);
+    tryMatch(db, req);
+    saveDB(db);
+
+    // reset form
+    btn.disabled = false;
+    txt.textContent = 'Find my match →';
+
+    // Show success in form card
+    const card = document.getElementById('form-container');
+    const finalReq = db.requests.find(r => r.id === requestId);
+    card.innerHTML = renderSuccess(finalReq, db);
+  }, 900);
+}
+
+function renderSuccess(req, db) {
+  return `
+    <div class="success-overlay">
+      <div class="success-icon">✓</div>
+      <h3>You're in the queue!</h3>
+      <p>Your request ID is:</p>
+      <div class="request-id-display">${req.id}</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">Save this — you'll need it to check your status.</p>
+      <button class="btn-primary" style="width:100%;margin-bottom:12px;" onclick="viewStatus('${req.id}')">View my status →</button>
+      <button class="btn-secondary" style="width:100%;" onclick="resetForm()">Submit another request</button>
+    </div>
+  `;
+}
+
+function resetForm() {
+  selectedRoute = 'DTW→ANN';
+  selectedTime = null;
+  document.getElementById('form-container').innerHTML = getFormHTML();
+  document.getElementById('route-dtw').classList.add('selected');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  STATUS PAGE
+// ═══════════════════════════════════════════════════════════════
+function viewStatus(requestId) {
+  const db = loadDB();
+  const req = db.requests.find(r => r.id === requestId);
+  if (!req) { showToast('Request not found.'); return; }
+
+  const container = document.getElementById('status-content');
+  container.innerHTML = renderStatusPage(req, db);
+  showPage('status');
+}
+
+function renderStatusPage(req, db) {
+  const routeLabel = req.route === 'DTW→ANN' ? 'DTW → Ann Arbor' : 'Ann Arbor → DTW';
+  const dateStr = req.date ? new Date(req.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '—';
+
+  let bodyHTML = '';
+
+  if (req.status === 'Matching') {
+    bodyHTML = `
+      <div class="matching-state">
+        <div class="matching-spinner"></div>
+        <h3>Finding your match</h3>
+        <p>We're looking for students traveling<br>${routeLabel} on ${dateStr} in the ${req.timeWindow}.</p>
+        <p style="margin-top:8px;font-size:12px;color:var(--text-faint);">Check back soon — matches happen when other students submit.</p>
+      </div>
+    `;
+  } else if (req.status === 'Matched') {
+    const group = db.groups.find(g => g.id === req.groupId);
+    const members = group ? group.memberIds.map(id => db.requests.find(r => r.id === id)).filter(Boolean) : [];
+
+    const ridersHTML = members.map(m => {
+      const isYou = m.id === req.id;
+      const initials = m.firstName ? m.firstName[0].toUpperCase() : '?';
+      return `
+        <div class="rider-row">
+          <div class="rider-avatar">${initials}</div>
+          <div class="rider-info">
+            <div class="rider-name">${m.name}${isYou ? '<span class="rider-you">· You</span>' : ''}</div>
+            <div class="rider-email">${m.email}</div>
+          </div>
+          <div style="font-size:12px;color:var(--text-faint);">${m.school}</div>
+        </div>
+      `;
+    }).join('');
+
+    bodyHTML = `
+      <div class="matched-group">
+        <div class="group-id-row">
+          <div>
+            <div class="group-id-label">Ride Group</div>
+            <div class="group-id-value">${group ? group.id : '—'}</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="group-id-label">Riders</div>
+            <div style="font-size:22px;font-family:'Instrument Serif',serif;">${members.length}</div>
+          </div>
+        </div>
+        <div class="riders-list">${ridersHTML}</div>
+        ${group ? `
+        <div class="pickup-box">
+          <div class="pickup-label">📍 Suggested pickup</div>
+          <div class="pickup-location">${group.pickupLocation}</div>
+          <div class="pickup-note">Coordinate with your group for exact timing.</div>
+        </div>` : ''}
+        <div class="instruction-box">
+          <p><strong>Next step:</strong> Reach out to your group members by email, coordinate a meeting time and place, then have one person book the Uber for everyone. Split the cost evenly.</p>
+        </div>
+      </div>
+    `;
+  }
+
+  const badgeHTML = req.status === 'Matching'
+    ? `<span class="badge badge-matching"><span class="badge-dot"></span> Matching</span>`
+    : `<span class="badge badge-matched"><span class="badge-dot"></span> Matched</span>`;
+
+  return `
+    <button class="status-back" onclick="showPage('home')">← Home</button>
+    <div class="status-card">
+      <div class="status-header">
+        <div>
+          <div class="status-id">${req.id}</div>
+          <div class="status-name">${req.name}</div>
+        </div>
+        ${badgeHTML}
+      </div>
+      <div class="status-meta">
+        <div class="meta-item">
+          <div class="meta-label">Route</div>
+          <div class="meta-value">${routeLabel}</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Date</div>
+          <div class="meta-value">${dateStr}</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Time</div>
+          <div class="meta-value">${req.timeWindow}</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">School</div>
+          <div class="meta-value">${req.school}</div>
+        </div>
+      </div>
+      ${bodyHTML}
+    </div>
+    <div style="margin-top:12px;">
+      <button class="btn-secondary" style="width:100%;" onclick="showPage('form')">Submit another trip</button>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  LOOKUP
+// ═══════════════════════════════════════════════════════════════
+function lookupRequest() {
+  const val = document.getElementById('lookup-input').value.trim().toUpperCase();
+  const err = document.getElementById('lookup-error');
+  err.style.display = 'none';
+
+  if (!val) { err.textContent = 'Please enter a request ID.'; err.style.display = 'block'; return; }
+
+  const db = loadDB();
+  const req = db.requests.find(r => r.id === val);
+  if (!req) { err.textContent = `No request found for "${val}". Check the ID and try again.`; err.style.display = 'block'; return; }
+
+  viewStatus(val);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  FORM HTML (for reset)
+// ═══════════════════════════════════════════════════════════════
+function getFormHTML() {
+  // After reset we reload the page to restore form; simpler approach:
+  location.reload();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  URL ROUTING (handle ?requestId=FS-0001)
+// ═══════════════════════════════════════════════════════════════
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const rid = params.get('requestId');
+  if (rid) {
+    const db = loadDB();
+    const req = db.requests.find(r => r.id === rid.toUpperCase());
+    if (req) { viewStatus(req.id); }
+  }
+
+  // Set default date to today
+  const today = new Date().toISOString().split('T')[0];
+  const dateInput = document.getElementById('f-date');
+  if (dateInput) { dateInput.value = today; dateInput.min = today; }
+})();
+</script>
+</body>
+</html>
