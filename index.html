@@ -1018,10 +1018,7 @@ function renderStatusPage(req, db) {
 // ═══════════════════════════════════════════════════════════════
 //  LOOKUP
 // ═══════════════════════════════════════════════════════════════
-<script>
-const LOOKUP_WEBHOOK_URL = "https://hook.us2.make.com/lro9s0d308wsa0fhu82493pvheye49un";
-
-async function lookupRequest() {
+function lookupRequest() {
   const val = document.getElementById('lookup-input').value.trim().toUpperCase();
   const err = document.getElementById('lookup-error');
   err.style.display = 'none';
@@ -1032,50 +1029,17 @@ async function lookupRequest() {
     return;
   }
 
-  try {
-    const response = await fetch(LOOKUP_WEBHOOK_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ requestId: val })
-    });
+  const db = loadDB();
+  const req = db.requests.find(r => r.id === val);
 
-    if (!response.ok) {
-      throw new Error("Lookup failed");
-    }
-
-    const data = await response.json();
-
-    if (!data.found) {
-      err.textContent = `No request found for "${val}". Check the ID and try again.`;
-      err.style.display = 'block';
-      return;
-    }
-
-    const req = {
-      id: data.id,
-      name: data.name,
-      email: data.email,
-      school: data.school,
-      route: data.route,
-      date: data.date,
-      timeWindow: data.timeWindow,
-      status: data.status,
-      groupId: data.groupId || null
-    };
-
-    const container = document.getElementById('status-content');
-    container.innerHTML = renderStatusPage(req, { groups: [] });
-    showPage('status');
-
-  } catch (error) {
-    console.error(error);
-    err.textContent = 'Something went wrong looking up your request.';
+  if (!req) {
+    err.textContent = `No request found for "${val}". Check the ID and try again.`;
     err.style.display = 'block';
+    return;
   }
+
+  viewStatus(val);
 }
-</script>
 
 // ═══════════════════════════════════════════════════════════════
 //  TOAST
@@ -1112,28 +1076,7 @@ function getFormHTML() {
   const dateInput = document.getElementById('f-date');
   if (dateInput) { dateInput.value = today; dateInput.min = today; }
 })();
- function lookupRequest() {
-  const val = document.getElementById('lookup-input').value.trim().toUpperCase();
-  const err = document.getElementById('lookup-error');
-  err.style.display = 'none';
 
-  if (!val) {
-    err.textContent = 'Please enter a request ID.';
-    err.style.display = 'block';
-    return;
-  }
-
-  const db = loadDB();
-  const req = db.requests.find(r => r.id === val);
-
-  if (!req) {
-    err.textContent = `No request found for "${val}". Check the ID and try again.`;
-    err.style.display = 'block';
-    return;
-  }
-
-  viewStatus(val);
-}
 </script>
 </body>
 </html>
