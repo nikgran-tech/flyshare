@@ -824,6 +824,28 @@ function submitForm() {
   const txt = document.getElementById('submit-text');
   btn.disabled = true;
   txt.textContent = 'Finding matches…';
+ const payload = {
+  firstName: name,
+  lastName: lastname,
+  email: email,
+  school: school,
+  route: selectedRoute,
+  date: date,
+  timeWindow: selectedTime
+};
+
+console.log("Sending to Make:", payload);
+
+fetch("https://hook.us2.make.com/lro9s0d308wsa0fhu82493pvheye49un", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify(payload)
+})
+.then(res => console.log("Webhook sent"))
+.catch(err => console.error("Webhook error:", err));
+ 
 
   setTimeout(() => {
     const db = loadDB();
