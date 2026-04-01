@@ -300,82 +300,7 @@
   .route-btn.selected { background: var(--text); color: #fff; border-color: var(--text); font-weight: 500; }
   .route-btn .route-icon { font-size: 18px; display: block; margin-bottom: 4px; }
 
- <script>
-const MAKE_WEBHOOK_URL = "https://hook.us2.make.com/lro9s0d308wsa0fhu82493pvheye49un";
-
-async function submitForm() {
-  const name = document.getElementById('f-name').value.trim();
-  const lastname = document.getElementById('f-lastname').value.trim();
-  const email = document.getElementById('f-email').value.trim();
-  const school = document.getElementById('f-school').value;
-  const date = document.getElementById('f-date').value;
-
-  if (!name || !email || !date || !selectedTime) {
-    showToast('Please fill in all fields and select a time window.');
-    return;
-  }
-
-  if (!email.includes('@')) {
-    showToast('Please enter a valid email address.');
-    return;
-  }
-
-  const btn = document.getElementById('submit-btn');
-  const txt = document.getElementById('submit-text');
-  btn.disabled = true;
-  txt.textContent = 'Submitting...';
-
-  const payload = {
-    firstName: name,
-    lastName: lastname,
-    email: email,
-    school: school,
-    route: selectedRoute,
-    date: date,
-    timeWindow: selectedTime
-  };
-
-  console.log("Sending to Make:", payload);
-
-  try {
-    const response = await fetch(MAKE_WEBHOOK_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      throw new Error("Webhook request failed");
-    }
-
-    btn.disabled = false;
-    txt.textContent = 'Find my match →';
-
-    const card = document.getElementById('form-container');
-    card.innerHTML = `
-      <div class="success-overlay">
-        <div class="success-icon">✓</div>
-        <h3>Request submitted</h3>
-        <p>Your trip was sent successfully.</p>
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">
-          We'll match you soon.
-        </p>
-        <button class="btn-secondary" style="width:100%;" onclick="location.reload()">
-          Submit another request
-        </button>
-      </div>
-    `;
-  } catch (error) {
-    console.error(error);
-    btn.disabled = false;
-    txt.textContent = 'Find my match →';
-    showToast('Submission failed. Please try again.');
-  }
-}
-</script>
-
+ 
   .submit-btn:hover { background: var(--accent-hover); }
   .submit-btn:active { transform: scale(0.99); }
   .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
@@ -684,7 +609,7 @@ async function submitForm() {
       <div class="form-group">
         <label class="form-label">Route</label>
         <div class="route-toggle">
-          <button class="route-btn selected" id="route-dtw" onclick="selectRoute('DTW→ANN')">
+<button type="button" class="route-btn" id="route-ann" onclick="selectRoute('ANN→DTW')">
             <span class="route-icon">✈️</span>
             DTW → Ann Arbor<br>
             <small style="font-size:11px;opacity:0.7;font-weight:400;">Arriving at DTW</small>
@@ -703,14 +628,14 @@ async function submitForm() {
       <div class="form-group">
         <label class="form-label">Time window</label>
         <div class="time-window-grid">
-          <button class="time-btn" id="tw-morning" onclick="selectTime('Morning')">
+        <button type="button" class="time-btn" id="tw-morning" onclick="selectTime('Morning')">
             Morning<small>6am–12pm</small>
           </button>
-          <button class="time-btn" id="tw-afternoon" onclick="selectTime('Afternoon')">
+<button type="button" class="time-btn" id="tw-afternoon" onclick="selectTime('Afternoon')">
             Afternoon<small>12pm–6pm</small>
           </button>
-          <button class="time-btn" id="tw-evening" onclick="selectTime('Evening')">
-            Evening<small>6pm–12am</small>
+<button type="button" class="time-btn" id="tw-evening" onclick="selectTime('Evening')">
+ Evening<small>6pm–12am</small>
           </button>
         </div>
       </div>
@@ -755,42 +680,34 @@ async function submitForm() {
 <footer>
   <p>Made for <strong>University of Michigan</strong> students · DTW ↔ Ann Arbor · <strong>FlyShare</strong></p>
 </footer>
-
 <script>
-// ═══════════════════════════════════════════════════════════════
-//  DATA STORE (in-memory, persisted to localStorage)
-// ═══════════════════════════════════════════════════════════════
 const DB_KEY = 'flyshare_db';
 
 function loadDB() {
   try {
     const raw = localStorage.getItem(DB_KEY);
     return raw ? JSON.parse(raw) : { requests: [], groups: [], counter: 0 };
-  } catch { return { requests: [], groups: [], counter: 0 }; }
+  } catch {
+    return { requests: [], groups: [], counter: 0 };
+  }
 }
 
 function saveDB(db) {
-  try { localStorage.setItem(DB_KEY, JSON.stringify(db)); } catch {}
+  try {
+    localStorage.setItem(DB_KEY, JSON.stringify(db));
+  } catch {}
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════════════════════════════
 let selectedRoute = 'DTW→ANN';
 let selectedTime = null;
+const MAKE_WEBHOOK_URL = "https://hook.us2.make.com/lro9s0d308wsa0fhu82493pvheye49un";
 
-// ═══════════════════════════════════════════════════════════════
-//  NAVIGATION
-// ═══════════════════════════════════════════════════════════════
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  FORM SELECTORS
-// ═══════════════════════════════════════════════════════════════
 function selectRoute(r) {
   selectedRoute = r;
   document.getElementById('route-dtw').classList.toggle('selected', r === 'DTW→ANN');
@@ -799,80 +716,19 @@ function selectRoute(r) {
 
 function selectTime(t) {
   selectedTime = t;
-  ['Morning','Afternoon','Evening'].forEach(w => {
+  ['Morning', 'Afternoon', 'Evening'].forEach(w => {
     document.getElementById('tw-' + w.toLowerCase()).classList.toggle('selected', w === t);
   });
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  GENERATE IDs
-// ═══════════════════════════════════════════════════════════════
-function genRequestId(counter) {
-  return 'FS-' + String(counter).padStart(4, '0');
-}
-function genGroupId(n) {
-  return 'G-' + String(n).padStart(2, '0');
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  MATCHING LOGIC
-// ═══════════════════════════════════════════════════════════════
-function timeWindowOverlaps(a, b) {
-  // Same window always overlaps. Adjacent windows overlap.
-  const order = ['Morning', 'Afternoon', 'Evening'];
-  const ia = order.indexOf(a), ib = order.indexOf(b);
-  return Math.abs(ia - ib) <= 1;
-}
-
-function tryMatch(db, newReq) {
-  // Find unmatched requests with same route, same date, overlapping time window
-  const candidates = db.requests.filter(r =>
-    r.id !== newReq.id &&
-    r.status === 'Matching' &&
-    r.route === newReq.route &&
-    r.date === newReq.date &&
-    timeWindowOverlaps(r.timeWindow, newReq.timeWindow) &&
-    (!r.groupId) // not already in a group
-  );
-
-  // Include the new request itself
-  const pool = [newReq, ...candidates];
-
-  if (pool.length < 2) return; // no match yet
-
-  // Take up to 4 riders
-  const group = pool.slice(0, 4);
-
-  // Create group
-  db.counter++;
-  const groupId = genGroupId(db.counter);
-  const pickupLocation = newReq.route === 'DTW→ANN'
-    ? 'DTW – McNamara Terminal, Arrivals Level (Door 4)'
-    : 'UMich – North Quad (1101 N University Ave)';
-
-  const newGroup = {
-    id: groupId,
-    route: newReq.route,
-    date: newReq.date,
-    timeWindow: newReq.timeWindow,
-    memberIds: group.map(r => r.id),
-    pickupLocation,
-    createdAt: new Date().toISOString(),
-  };
-
-  db.groups.push(newGroup);
-
-  // Update all members
-  group.forEach(member => {
-    const req = db.requests.find(r => r.id === member.id);
-    if (req) { req.status = 'Matched'; req.groupId = groupId; }
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  SUBMIT FORM
-// ═══════════════════════════════════════════════════════════════
-function submitForm() {
+async function submitForm() {
   const name = document.getElementById('f-name').value.trim();
   const lastname = document.getElementById('f-lastname').value.trim();
   const email = document.getElementById('f-email').value.trim();
@@ -883,6 +739,7 @@ function submitForm() {
     showToast('Please fill in all fields and select a time window.');
     return;
   }
+
   if (!email.includes('@')) {
     showToast('Please enter a valid email address.');
     return;
@@ -891,228 +748,94 @@ function submitForm() {
   const btn = document.getElementById('submit-btn');
   const txt = document.getElementById('submit-text');
   btn.disabled = true;
-  txt.textContent = 'Finding matches…';
+  txt.textContent = 'Submitting...';
 
-  setTimeout(() => {
-    const db = loadDB();
-    db.counter++;
-    const requestId = genRequestId(db.counter);
+  const payload = {
+    firstName: name,
+    lastName: lastname,
+    email: email,
+    school: school,
+    route: selectedRoute,
+    date: date,
+    timeWindow: selectedTime
+  };
 
-    const req = {
-      id: requestId,
-      name: name + (lastname ? ' ' + lastname : ''),
-      firstName: name,
-      email,
-      school,
-      route: selectedRoute,
-      date,
-      timeWindow: selectedTime,
-      status: 'Matching',
-      groupId: null,
-      createdAt: new Date().toISOString(),
-    };
+  console.log("Sending to Make:", payload);
 
-    db.requests.push(req);
-    tryMatch(db, req);
-    saveDB(db);
+  try {
+    const response = await fetch(MAKE_WEBHOOK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
 
-    // reset form
+    if (!response.ok) {
+      throw new Error("Webhook request failed");
+    }
+
     btn.disabled = false;
     txt.textContent = 'Find my match →';
 
-    // Show success in form card
     const card = document.getElementById('form-container');
-    const finalReq = db.requests.find(r => r.id === requestId);
-    card.innerHTML = renderSuccess(finalReq, db);
-  }, 900);
-}
-
-function renderSuccess(req, db) {
-  return `
-    <div class="success-overlay">
-      <div class="success-icon">✓</div>
-      <h3>You're in the queue!</h3>
-      <p>Your request ID is:</p>
-      <div class="request-id-display">${req.id}</div>
-      <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">Save this — you'll need it to check your status.</p>
-      <button class="btn-primary" style="width:100%;margin-bottom:12px;" onclick="viewStatus('${req.id}')">View my status →</button>
-      <button class="btn-secondary" style="width:100%;" onclick="resetForm()">Submit another request</button>
-    </div>
-  `;
-}
-
-function resetForm() {
-  selectedRoute = 'DTW→ANN';
-  selectedTime = null;
-  document.getElementById('form-container').innerHTML = getFormHTML();
-  document.getElementById('route-dtw').classList.add('selected');
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  STATUS PAGE
-// ═══════════════════════════════════════════════════════════════
-function viewStatus(requestId) {
-  const db = loadDB();
-  const req = db.requests.find(r => r.id === requestId);
-  if (!req) { showToast('Request not found.'); return; }
-
-  const container = document.getElementById('status-content');
-  container.innerHTML = renderStatusPage(req, db);
-  showPage('status');
-}
-
-function renderStatusPage(req, db) {
-  const routeLabel = req.route === 'DTW→ANN' ? 'DTW → Ann Arbor' : 'Ann Arbor → DTW';
-  const dateStr = req.date ? new Date(req.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '—';
-
-  let bodyHTML = '';
-
-  if (req.status === 'Matching') {
-    bodyHTML = `
-      <div class="matching-state">
-        <div class="matching-spinner"></div>
-        <h3>Finding your match</h3>
-        <p>We're looking for students traveling<br>${routeLabel} on ${dateStr} in the ${req.timeWindow}.</p>
-        <p style="margin-top:8px;font-size:12px;color:var(--text-faint);">Check back soon — matches happen when other students submit.</p>
+    card.innerHTML = `
+      <div class="success-overlay">
+        <div class="success-icon">✓</div>
+        <h3>Request submitted</h3>
+        <p>Your trip was sent successfully.</p>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">
+          We'll match you soon.
+        </p>
+        <button class="btn-secondary" style="width:100%;" onclick="location.reload()">
+          Submit another request
+        </button>
       </div>
     `;
-  } else if (req.status === 'Matched') {
-    const group = db.groups.find(g => g.id === req.groupId);
-    const members = group ? group.memberIds.map(id => db.requests.find(r => r.id === id)).filter(Boolean) : [];
-
-    const ridersHTML = members.map(m => {
-      const isYou = m.id === req.id;
-      const initials = m.firstName ? m.firstName[0].toUpperCase() : '?';
-      return `
-        <div class="rider-row">
-          <div class="rider-avatar">${initials}</div>
-          <div class="rider-info">
-            <div class="rider-name">${m.name}${isYou ? '<span class="rider-you">· You</span>' : ''}</div>
-            <div class="rider-email">${m.email}</div>
-          </div>
-          <div style="font-size:12px;color:var(--text-faint);">${m.school}</div>
-        </div>
-      `;
-    }).join('');
-
-    bodyHTML = `
-      <div class="matched-group">
-        <div class="group-id-row">
-          <div>
-            <div class="group-id-label">Ride Group</div>
-            <div class="group-id-value">${group ? group.id : '—'}</div>
-          </div>
-          <div style="text-align:right;">
-            <div class="group-id-label">Riders</div>
-            <div style="font-size:22px;font-family:'Instrument Serif',serif;">${members.length}</div>
-          </div>
-        </div>
-        <div class="riders-list">${ridersHTML}</div>
-        ${group ? `
-        <div class="pickup-box">
-          <div class="pickup-label">📍 Suggested pickup</div>
-          <div class="pickup-location">${group.pickupLocation}</div>
-          <div class="pickup-note">Coordinate with your group for exact timing.</div>
-        </div>` : ''}
-        <div class="instruction-box">
-          <p><strong>Next step:</strong> Reach out to your group members by email, coordinate a meeting time and place, then have one person book the Uber for everyone. Split the cost evenly.</p>
-        </div>
-      </div>
-    `;
+  } catch (error) {
+    console.error(error);
+    btn.disabled = false;
+    txt.textContent = 'Find my match →';
+    showToast('Submission failed. Please try again.');
   }
-
-  const badgeHTML = req.status === 'Matching'
-    ? `<span class="badge badge-matching"><span class="badge-dot"></span> Matching</span>`
-    : `<span class="badge badge-matched"><span class="badge-dot"></span> Matched</span>`;
-
-  return `
-    <button class="status-back" onclick="showPage('home')">← Home</button>
-    <div class="status-card">
-      <div class="status-header">
-        <div>
-          <div class="status-id">${req.id}</div>
-          <div class="status-name">${req.name}</div>
-        </div>
-        ${badgeHTML}
-      </div>
-      <div class="status-meta">
-        <div class="meta-item">
-          <div class="meta-label">Route</div>
-          <div class="meta-value">${routeLabel}</div>
-        </div>
-        <div class="meta-item">
-          <div class="meta-label">Date</div>
-          <div class="meta-value">${dateStr}</div>
-        </div>
-        <div class="meta-item">
-          <div class="meta-label">Time</div>
-          <div class="meta-value">${req.timeWindow}</div>
-        </div>
-        <div class="meta-item">
-          <div class="meta-label">School</div>
-          <div class="meta-value">${req.school}</div>
-        </div>
-      </div>
-      ${bodyHTML}
-    </div>
-    <div style="margin-top:12px;">
-      <button class="btn-secondary" style="width:100%;" onclick="showPage('form')">Submit another trip</button>
-    </div>
-  `;
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  LOOKUP
-// ═══════════════════════════════════════════════════════════════
 function lookupRequest() {
   const val = document.getElementById('lookup-input').value.trim().toUpperCase();
   const err = document.getElementById('lookup-error');
   err.style.display = 'none';
 
-  if (!val) { err.textContent = 'Please enter a request ID.'; err.style.display = 'block'; return; }
+  if (!val) {
+    err.textContent = 'Please enter a request ID.';
+    err.style.display = 'block';
+    return;
+  }
 
   const db = loadDB();
   const req = db.requests.find(r => r.id === val);
-  if (!req) { err.textContent = `No request found for "${val}". Check the ID and try again.`; err.style.display = 'block'; return; }
+  if (!req) {
+    err.textContent = `No request found for "${val}". Check the ID and try again.`;
+    err.style.display = 'block';
+    return;
+  }
 
   viewStatus(val);
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  TOAST
-// ═══════════════════════════════════════════════════════════════
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+function viewStatus(requestId) {
+  showToast('Status page still uses old local data and needs to be connected next.');
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  FORM HTML (for reset)
-// ═══════════════════════════════════════════════════════════════
-function getFormHTML() {
-  // After reset we reload the page to restore form; simpler approach:
-  location.reload();
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  URL ROUTING (handle ?requestId=FS-0001)
-// ═══════════════════════════════════════════════════════════════
 (function() {
-  const params = new URLSearchParams(window.location.search);
-  const rid = params.get('requestId');
-  if (rid) {
-    const db = loadDB();
-    const req = db.requests.find(r => r.id === rid.toUpperCase());
-    if (req) { viewStatus(req.id); }
-  }
-
-  // Set default date to today
   const today = new Date().toISOString().split('T')[0];
   const dateInput = document.getElementById('f-date');
-  if (dateInput) { dateInput.value = today; dateInput.min = today; }
+  if (dateInput) {
+    dateInput.value = today;
+    dateInput.min = today;
+  }
 })();
 </script>
+
+
 </body>
 </html>
