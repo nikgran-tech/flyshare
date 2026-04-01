@@ -299,15 +299,83 @@
   .route-btn:hover { border-color: var(--border-strong); color: var(--text); }
   .route-btn.selected { background: var(--text); color: #fff; border-color: var(--text); font-weight: 500; }
   .route-btn .route-icon { font-size: 18px; display: block; margin-bottom: 4px; }
-  .submit-btn {
-    width: 100%; margin-top: 8px;
-    background: var(--accent); color: #fff;
-    border: none; border-radius: var(--radius);
-    padding: 14px; font-size: 15px; font-weight: 500;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer; transition: background .15s, transform .1s;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
+
+ <script>
+const MAKE_WEBHOOK_URL = "https://hook.us2.make.com/lro9s0d308wsa0fhu82493pvheye49un";
+
+async function submitForm() {
+  const name = document.getElementById('f-name').value.trim();
+  const lastname = document.getElementById('f-lastname').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const school = document.getElementById('f-school').value;
+  const date = document.getElementById('f-date').value;
+
+  if (!name || !email || !date || !selectedTime) {
+    showToast('Please fill in all fields and select a time window.');
+    return;
   }
+
+  if (!email.includes('@')) {
+    showToast('Please enter a valid email address.');
+    return;
+  }
+
+  const btn = document.getElementById('submit-btn');
+  const txt = document.getElementById('submit-text');
+  btn.disabled = true;
+  txt.textContent = 'Submitting...';
+
+  const payload = {
+    firstName: name,
+    lastName: lastname,
+    email: email,
+    school: school,
+    route: selectedRoute,
+    date: date,
+    timeWindow: selectedTime
+  };
+
+  console.log("Sending to Make:", payload);
+
+  try {
+    const response = await fetch(MAKE_WEBHOOK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error("Webhook request failed");
+    }
+
+    btn.disabled = false;
+    txt.textContent = 'Find my match →';
+
+    const card = document.getElementById('form-container');
+    card.innerHTML = `
+      <div class="success-overlay">
+        <div class="success-icon">✓</div>
+        <h3>Request submitted</h3>
+        <p>Your trip was sent successfully.</p>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">
+          We'll match you soon.
+        </p>
+        <button class="btn-secondary" style="width:100%;" onclick="location.reload()">
+          Submit another request
+        </button>
+      </div>
+    `;
+  } catch (error) {
+    console.error(error);
+    btn.disabled = false;
+    txt.textContent = 'Find my match →';
+    showToast('Submission failed. Please try again.');
+  }
+}
+</script>
+
   .submit-btn:hover { background: var(--accent-hover); }
   .submit-btn:active { transform: scale(0.99); }
   .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
