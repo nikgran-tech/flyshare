@@ -1112,6 +1112,28 @@ function getFormHTML() {
   const dateInput = document.getElementById('f-date');
   if (dateInput) { dateInput.value = today; dateInput.min = today; }
 })();
+ function lookupRequest() {
+  const val = document.getElementById('lookup-input').value.trim().toUpperCase();
+  const err = document.getElementById('lookup-error');
+  err.style.display = 'none';
+
+  if (!val) {
+    err.textContent = 'Please enter a request ID.';
+    err.style.display = 'block';
+    return;
+  }
+
+  const db = loadDB();
+  const req = db.requests.find(r => r.id === val);
+
+  if (!req) {
+    err.textContent = `No request found for "${val}". Check the ID and try again.`;
+    err.style.display = 'block';
+    return;
+  }
+
+  viewStatus(val);
+}
 </script>
 </body>
 </html>
