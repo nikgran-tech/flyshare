@@ -710,7 +710,8 @@ function saveDB(db) {
 // ═══════════════════════════════════════════════════════════════
 let selectedRoute = 'DTW → ANN';
 let selectedTime = null;
-
+const LOOKUP_WEBHOOK_URL = "https://hook.us2.make.com/lro9s0d308wsa0fhu82493pvheye49un";
+ 
 // ═══════════════════════════════════════════════════════════════
 //  NAVIGATION
 // ═══════════════════════════════════════════════════════════════
@@ -1018,7 +1019,7 @@ function renderStatusPage(req, db) {
 // ═══════════════════════════════════════════════════════════════
 //  LOOKUP
 // ═══════════════════════════════════════════════════════════════
-function lookupRequest() {
+async function lookupRequest() {
   const val = document.getElementById('lookup-input').value.trim().toUpperCase();
   const err = document.getElementById('lookup-error');
   err.style.display = 'none';
@@ -1029,16 +1030,68 @@ function lookupRequest() {
     return;
   }
 
-  const db = loadDB();
-  const req = db.requests.find(r => r.id === val);
+  try {
+    const response = await fetch(LOOKUP_WEBHOOK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ requestId: val })
+    });
 
-  if (!req) {
-    err.textContent = `No request found for "${val}". Check the ID and try again.`;
+    if (!response.ok) {
+      throw new Error("Lookup failed");
+    }
+
+    const data = await response.json();
+
+    if (!data.found) {
+      err.textContent = `No request found for "${val}". Check the ID and try again.`;
+      err.style.display = 'block';
+      return;
+    }
+
+    const req = {
+      id: data.id,
+      name: data.name,
+      firstName: data.firstName || (data.name ? data.name.split(' ')[0] : ''),
+      email: data.email,
+      school: data.school,
+      route: data.route,
+      date: data.date,
+      timeWindow: data.timeWindow,
+      status: data.status,
+      groupId: data.groupId || null
+    };
+
+    const fakeDb = {
+      groups: data.group
+        ? [{
+            id: data.group.id,
+            pickupLocation: data.group.pickupLocation,
+            memberIds: (data.group.members || []).map(m => m.id)
+          }]
+        : [],
+      requests: data.group
+        ? (data.group.members || []).map(m => ({
+            id: m.id,
+            name: m.name,
+            firstName: m.firstName || (m.name ? m.name.split(' ')[0] : ''),
+            email: m.email,
+            school: m.school
+          }))
+        : [req]
+    };
+
+    const container = document.getElementById('status-content');
+    container.innerHTML = renderStatusPage(req, fakeDb);
+    showPage('status');
+
+  } catch (error) {
+    console.error(error);
+    err.textContent = 'Something went wrong looking up your request.';
     err.style.display = 'block';
-    return;
   }
-
-  viewStatus(val);
 }
 
 // ═══════════════════════════════════════════════════════════════
